@@ -1,0 +1,45 @@
+#import packages
+import numpy as np
+import pandas as pd
+
+#read the dataset
+df = pd.read_csv('car_data.csv')
+df.head()
+
+#define input and target variables
+x = df[['User ID','AnnualSalary']]
+y= df['Purchased']
+
+def sigmoid(input):    
+    output = 1 / (1 + np.exp(-input))
+    return output
+    
+init_parameters = {} 
+init_parameters["weight"] = np.zeros(x.shape[1])
+init_parameters["bias"] = 0
+
+def optimize(x, y,learning_rate,iterations,parameters): 
+    size = x.shape[0]
+    weight = parameters["weight"] 
+    bias = parameters["bias"]
+    for i in range(iterations): 
+      sigma = sigmoid(np.dot(x, weight) + bias)
+      loss = -1/size * np.sum(y * np.log(sigma)) + (1 - y) * np.log(1-sigma)
+      dW = 1/size * np.dot(x.T, (sigma - y))
+      db = 1/size * np.sum(sigma - y)
+      weight -= learning_rate * dW
+      bias -= learning_rate * db  
+      parameters["weight"] = weight
+      parameters["bias"] = bias
+    return parameters
+    
+def train(x, y, learning_rate,iterations):
+    parameters_out = optimize(x, y, learning_rate, iterations ,init_parameters)
+    return parameters_out
+    
+parameters_out = train(x, y, learning_rate = 0.02, iterations = 500)
+print(parameters_out)
+
+output_values = np.dot(x[:5], parameters_out["weight"]) + parameters_out["bias"]
+predictions = sigmoid(output_values) >= 1/2
+predictions
